@@ -18,6 +18,8 @@ TAG_EXTRA = ('class="adicional"', '</p>')
 TAG_EXTRA_SEP = 'br'
 TAG_EXTRA_DELIMITER = ('<b>', '</b>')
 TAG_PHRASE_DELIMITER = ('<div class="frase"', '</div>')
+TAG_ETYMOLOGY = ('class="etim"', '</span>')
+TAG_ETYMOLOGY_DELIMITER = ('<i>', '</i>')
 
 
 class Word(object):
@@ -144,4 +146,35 @@ class Dicio(object):
                     dict_extra[key] = value
         except:
             pass
+
+        if 'Plural' not in dict_extra and 'Singular' not in dict_extra:
+            etymology = self.scrape_etymology(page)
+            for key,value in etymology.items():
+                dict_extra[key] = value
+
         return dict_extra
+
+    def scrape_etymology(self, page):
+        print('double check')
+        data = {}
+        try:
+            word = Utils.text_between(page, "<h1", "</h1>",  force_html=True).lower()
+            if page.find(TAG_ETYMOLOGY[0]) > -1:
+                html = Utils.text_between(page, *TAG_ETYMOLOGY, force_html=True).lower()
+                if 'plural' in html:
+                    index = html.index('plural')
+                    html = html[index:].replace('.',' ').split(' ')
+                    match = [x for x in html if word[:3] == x[:3]]
+                    if match:
+                        data['Plural'] = match[0]
+
+                elif 'singular' in html:
+                    index = html.index('singular')
+                    html = html[index:].split(' ')
+                    match = [x for x in html if word[:3] == x[:3]]
+                    if match:
+                        data['Singular'] = match[0]
+        except:
+            pass
+
+        return data
