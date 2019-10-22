@@ -163,17 +163,19 @@ class Dicio(object):
                 html = Utils.text_between(page, *TAG_ETYMOLOGY, force_html=True).lower()
                 if 'plural' in html:
                     index = html.index('plural')
-                    html = html[index:].replace('.',' ').split(' ')
-                    match = [x for x in html if word[:3] == x[:3]]
-                    if match:
-                        data['Plural'] = match[0]
-
                 elif 'singular' in html:
                     index = html.index('singular')
-                    html = html[index:].split(' ')
-                    match = [x for x in html if word[:3] == x[:3]]
-                    if match:
+                else:
+                    return data
+
+                paragraph = html[index:].replace('.','').replace(',','')
+                paragraph = paragraph.split(' ')
+                match = [_word for _word in paragraph if _word.startswith(word[:3])]
+                if match:
+                    if 'plural' in html:
                         data['Singular'] = match[0]
+                    elif 'singular' in html:
+                        data['Plural'] = match[0]
         except:
             pass
 
